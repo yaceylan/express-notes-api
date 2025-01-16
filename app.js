@@ -43,7 +43,7 @@ app.post("/notes", (req, res) => {
     date: new Date(),
   };
   notes.push(newNote);
-  res.send("Note has been stored");
+  res.send("Status code is 201 Created");
 });
 
 // PUT /notes/:id - Notiz aktualisieren
