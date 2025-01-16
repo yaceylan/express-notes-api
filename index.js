@@ -1,45 +1,78 @@
 const express = require("express");
 const app = express();
-const port = 8000;
+const port = 3000;
 
+app.use(express.json());
+
+// Array für die Notizen
 let notes = [
-    {
-        note: "My new Note",
-        autor: "Max Mustermann",
-        date: "2025-01-15"
-      }
+  { id: 1, note: "My new Note", autor: "Max Mustermann", date: "2025-01-15" },
 ];
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.get("/", (request, response) => {
+  response.send("Welcome to Express Notes API");
 });
 
-app.get('/notes', (req, res) => {
-    console.log('Fetching notes:', notes); 
-    res.json(notes);
-})
-  
-app.get('/:id', (req, res) => res.send(`Note ${req.params.id}`));
+// GET /notes - Alle Notizen abrufen
 app.get("/notes", (req, res) => {
-    res.json("notes");
+  res.json(notes);
 });
 
+// GET /notes/:id - Notiz nach ID abrufen
+app.get("/notes/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  let findNote = null;
+  notes.forEach((note) => {
+    if (note.id === id) {
+      findNote = note;
+    }
+  });
 
+  // const note = notes.find((note) => note.id === id);
+  res.json(findNote);
+});
+
+// POST /notes - Neue Notiz erstellen
 app.post("/notes", (req, res) => {
-    res.json("notes");
+  const lastId = notes[notes.length - 1].id;
+  console.log(lastId);
+  const newNote = {
+    id: lastId + 1,
+    note: req.body.note,
+    autor: req.body.autor,
+    date: new Date(),
+  };
+  notes.push(newNote);
+  res.send("Note has been stored");
 });
 
-app.post('/', (req, res) => res.send('Creating a new note'));
+// PUT /notes/:id - Notiz aktualisieren
+app.put("/notes/:id", (req, res) => {
+  let id = parseInt(req.params.id);
+  let updateNote = null;
+  notes.forEach((note) => {
+    if (note.id === id) {
+      updateNote = note;
+    }
+  });
 
-app.put("/notes", (req, res) => {
-    res.json("notes");
+  if (updateNote !== null) {
+    updateNote.note = req.body.note;
+    updateNote.autor = req.body.autor;
+    updateNote.date = new Date();
+  }
+  res.send(updateNote);
 });
 
-app.put('/:id', (req, res) => res.send(`Updating note ${req.params.id}`));
-
-app.delete("/notes", (req, res) => {    
-    res.json("notes");
+// DELETE /notes/:id - Notiz löschen
+app.delete("/notes/:id", (req, res) => {
+  let id = parseInt(req.params.id);
+  notes = notes.filter((note) => note.id !== id);
+  console.log(notes);
+  res.send(notes);
 });
 
-app.delete('/:id', (req, res) => res.send(`Deleting note ${req.params.id}`));
-
+// Server starten
+app.listen(port, () => {
+  console.log(`server running on http://localhost:${port}`);
+});
